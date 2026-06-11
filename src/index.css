@@ -5,19 +5,23 @@
 }
 
 :root {
-  --color-bg: #f7f7f5;
+  --color-bg: #fdfcf5;
   --color-surface: #ffffff;
-  --color-border: #e4e4e0;
-  --color-text: #1a1a18;
-  --color-muted: #6b6b66;
-  --color-accent: #2563eb;
-  --color-accent-light: #eff6ff;
-  --color-warn: #f59e0b;
-  --color-warn-light: #fffbeb;
+  --color-border: #e6dfc8;
+  --color-text: #1a1500;
+  --color-muted: #6b6248;
+  --color-accent: #f5c518;
+  --color-accent-fg: #1a1200;
+  --color-accent-light: #fef8d0;
+  --color-accent-dark: #c9a010;
+  --color-warn: #f97316;
+  --color-warn-light: #fff4ec;
   --color-danger: #dc2626;
   --color-danger-light: #fef2f2;
   --color-success: #16a34a;
   --color-success-light: #f0fdf4;
+  --color-info: #0ea5e9;
+  --color-info-light: #f0f9ff;
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 1px 3px rgba(0,0,0,.08);
@@ -59,7 +63,7 @@ button:active { opacity: .85; }
 
 .btn-primary {
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-accent-fg);
 }
 
 .btn-secondary {
@@ -74,7 +78,7 @@ button:active { opacity: .85; }
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-accent);
+  color: var(--color-accent-dark);
   padding: 0.5rem 0.75rem;
 }
 

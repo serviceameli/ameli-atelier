@@ -5,9 +5,11 @@ import LoginPage from './pages/LoginPage.jsx'
 import StockPage from './pages/StockPage.jsx'
 import ReceivePage from './pages/ReceivePage.jsx'
 import TransferPage from './pages/TransferPage.jsx'
+import OrdersPage from './pages/OrdersPage.jsx'
 
 const TABS = [
-  { id: 'stock', label: 'Остатки' },
+  { id: 'orders', label: 'Заказы' },
+  { id: 'stock', label: 'Склад' },
   { id: 'receive', label: 'Приход' },
   { id: 'transfer', label: 'Передать' },
 ]
@@ -15,7 +17,7 @@ const TABS = [
 export default function App() {
   const [session, setSession] = useState(undefined) // undefined = loading
   const [profile, setProfile] = useState(null)
-  const [tab, setTab] = useState('stock')
+  const [tab, setTab] = useState('orders')
   const [selectedItem, setSelectedItem] = useState(null)
 
   useEffect(() => {
@@ -104,6 +106,7 @@ export default function App() {
       </header>
 
       <main style={{ flex: 1, padding: '1rem', overflow: 'auto' }}>
+        {tab === 'orders' && <OrdersPage profile={profile} />}
         {tab === 'stock' && (
           <StockPage onTransfer={(item) => { setSelectedItem(item); setTab('transfer') }} />
         )}
