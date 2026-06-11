@@ -7,10 +7,12 @@ import ReceivePage from './pages/ReceivePage.jsx'
 import TransferPage from './pages/TransferPage.jsx'
 import OrdersPage from './pages/OrdersPage.jsx'
 import CalcPage from './pages/CalcPage.jsx'
+import ConsumablesPage from './pages/ConsumablesPage.jsx'
 
 const TABS = [
   { id: 'orders', label: 'Заказы' },
   { id: 'stock', label: 'Склад' },
+  { id: 'consumables', label: 'Фурнитура' },
   { id: 'calc', label: 'Калькулятор' },
   { id: 'receive', label: 'Приход' },
   { id: 'transfer', label: 'Передать' },
@@ -109,6 +111,7 @@ export default function App() {
 
       <main style={{ flex: 1, padding: '1rem', overflow: 'auto' }}>
         {tab === 'orders' && <OrdersPage profile={profile} />}
+        {tab === 'consumables' && <ConsumablesPage />}
         {tab === 'calc' && <CalcPage />}
         {tab === 'stock' && (
           <StockPage onTransfer={(item) => { setSelectedItem(item); setTab('transfer') }} />
