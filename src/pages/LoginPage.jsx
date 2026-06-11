@@ -23,6 +23,19 @@ export default function LoginPage({ onLogin }) {
     }
   }
 
+  async function quickLogin() {
+    setError(null)
+    setLoading(true)
+    try {
+      await signIn('service.ameli.aniri@gmail.com', 'Ameli2025!')
+      onLogin()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div style={{
       minHeight: '100dvh', display: 'flex', alignItems: 'center',
@@ -37,20 +50,35 @@ export default function LoginPage({ onLogin }) {
           </p>
         </div>
 
+        {/* Быстрый вход для тестирования */}
+        <button
+          className="btn-primary"
+          style={{ width: '100%', marginBottom: '1.25rem', fontSize: '1rem', padding: '0.875rem' }}
+          onClick={quickLogin}
+          disabled={loading}
+        >
+          {loading ? 'Входим…' : '⚡ Войти как Амели (тест)'}
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+          <span style={{ fontSize: '0.8125rem', color: 'var(--color-muted)' }}>или войти вручную</span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+        </div>
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
           <div>
             <label>Email</label>
             <input
               type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="example@mail.ru" required autoComplete="email"
-              inputMode="email"
+              placeholder="example@mail.ru" autoComplete="email" inputMode="email"
             />
           </div>
           <div>
             <label>Пароль</label>
             <input
               type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••" required autoComplete="current-password"
+              placeholder="••••••••" autoComplete="current-password"
             />
           </div>
 
@@ -59,9 +87,9 @@ export default function LoginPage({ onLogin }) {
           )}
 
           <button
-            type="submit" className="btn-primary"
-            style={{ marginTop: '0.25rem', width: '100%' }}
-            disabled={loading}
+            type="submit" className="btn-secondary"
+            style={{ width: '100%' }}
+            disabled={loading || !email || !password}
           >
             {loading ? 'Входим…' : 'Войти'}
           </button>
