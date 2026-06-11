@@ -218,7 +218,7 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger trg_apply_consumption
+create or replace trigger trg_apply_consumption
 after insert on consumptions
 for each row execute function apply_consumption();
 
@@ -289,7 +289,7 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger trg_consumable_receipt
+create or replace trigger trg_consumable_receipt
 after insert on consumable_receipts
 for each row execute function apply_consumable_receipt();
 
@@ -302,7 +302,7 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger trg_consumable_usage
+create or replace trigger trg_consumable_usage
 after insert on consumable_usage
 for each row execute function apply_consumable_usage();
 

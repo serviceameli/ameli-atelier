@@ -7,6 +7,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
@@ -31,12 +32,25 @@ if (!url || !key) {
   process.exit(1)
 }
 
-const db = createClient(url, key)
+const db = createClient(url, key, { realtime: { transport: ws } })
 
 function csv(name) {
   return parse(readFileSync(join(root, 'data', name), 'utf8'), {
     columns: true, skip_empty_lines: true, trim: true, bom: true,
   })
+}
+
+// Нормализация названий типов ткани: "Бархат Бета" → "Бархат"
+function normalizeFabricType(raw) {
+  if (!raw) return raw
+  const aliases = {
+    'бархат бета': 'Бархат',
+    'канвас гамма': 'Канвас',
+    'габардин альфа': 'Габардин',
+    'канвас китай': 'Канвас',
+    'юми': 'Парча',
+  }
+  return aliases[raw.toLowerCase()] || raw.trim()
 }
 
 // ─── утилиты ──────────────────────────────────────────────────────────────────
@@ -96,8 +110,9 @@ const colorsRaw = csv('colors.csv')
 const colorSupplierPairs = [] // { color_name, supplier_names[] }
 
 for (const r of colorsRaw) {
-  const ftId = ftByName[r.fabric_type?.toLowerCase()]
-  if (!ftId) { console.warn(`   ⚠ fabric_type не найден: "${r.fabric_type}", цвет "${r.name}" пропущен`); continue }
+  const ftNorm = normalizeFabricType(r.fabric_type)
+  const ftId = ftByName[ftNorm?.toLowerCase()]
+  if (!ftId) { console.warn(`   ⚠ fabric_type не найден: "${r.fabric_type}" → "${ftNorm}", цвет "${r.name}" пропущен`); continue }
   await db.from('colors').upsert({
     name: r.name,
     code: r.code || null,
@@ -106,7 +121,7 @@ for (const r of colorsRaw) {
     active: true,
   }, { onConflict: 'name,code,fabric_type_id', ignoreDuplicates: true })
   if (r.suppliers) {
-    colorSupplierPairs.push({ name: r.name, code: r.code || null, fabric_type: r.fabric_type, suppliers: r.suppliers.split(',').map(s => s.trim()) })
+    colorSupplierPairs.push({ name: r.name, code: r.code || null, fabric_type: ftNorm, suppliers: r.suppliers.split(',').map(s => s.trim()) })
   }
 }
 
@@ -186,16 +201,33 @@ console.log(`   ✓ product_types: ${ptDB.length}`)
 console.log('\n💰 Импорт sewing_prices…')
 const spRaw = csv('sewing_prices.csv')
 for (const r of spRaw) {
-  const ftId = ftByName[r.fabric_type?.toLowerCase()]
-  const ptId = ptByName[r.product?.toLowerCase()]
-  if (!ptId) { console.warn(`   ⚠ product_type не найден: "${r.product}"`); continue }
-  await db.from('sewing_prices').upsert({
-    fabric_type_id: ftId || null,
-    product_type_id: ptId,
-    price_rub: parseFloat(r.price_rub),
-    includes_fabric: r.includes_fabric === 'да' || r.includes_fabric === 'true',
-    note: r.note || null,
-  }, { onConflict: 'product_type_id,fabric_type_id', ignoreDuplicates: true })
+  const ftNorm = normalizeFabricType(r.fabric_type)
+  const ftId = ftByName[ftNorm?.toLowerCase()]
+  let ptId = ptByName[r.product?.toLowerCase()]
+  if (!ptId) {
+    // auto-создаём product_type
+    const { data: newPt } = await db.from('product_types')
+      .upsert({ name: r.product }, { onConflict: 'name', ignoreDuplicates: false })
+      .select('id').single()
+    if (newPt) { ptId = newPt.id; ptByName[r.product.toLowerCase()] = ptId }
+    else { console.warn(`   ⚠ не удалось создать product_type: "${r.product}"`); continue }
+  }
+  // проверяем существование перед вставкой
+  const { data: existing } = await db.from('sewing_prices')
+    .select('id')
+    .eq('product_type_id', ptId)
+    .eq('fabric_type_id', ftId ?? null)
+    .maybeSingle()
+  if (!existing) {
+    const { error: spErr } = await db.from('sewing_prices').insert({
+      fabric_type_id: ftId ?? null,
+      product_type_id: ptId,
+      price_rub: parseFloat(r.price_rub),
+      includes_fabric: r.includes_fabric === 'да' || r.includes_fabric === 'true',
+      note: r.note || null,
+    })
+    if (spErr) console.warn(`   ⚠ sewing_price insert: ${spErr.message}`)
+  }
 }
 const { data: spDB } = await db.from('sewing_prices').select('id')
 console.log(`   ✓ sewing_prices: ${spDB.length}`)
