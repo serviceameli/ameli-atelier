@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-export default function TransferPage({ initialItem, onDone }) {
+export default function TransferPage({ initialItem, onDone, onCancel }) {
   const [rolls, setRolls] = useState([])
   const [pieces, setPieces] = useState([])
   const [locations, setLocations] = useState([])

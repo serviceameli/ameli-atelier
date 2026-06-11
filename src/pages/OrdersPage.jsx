@@ -93,6 +93,8 @@ export default function OrdersPage({ profile }) {
     const { data } = await supabase
       .from('orders')
       .select('*, seamstresses(name), order_items(id, qty, product_types(name))')
+      .order('is_urgent', { ascending: false })
+      .order('due_date', { ascending: true, nullsLast: true })
       .order('created_at', { ascending: false })
     setOrders(data || [])
     setLoading(false)

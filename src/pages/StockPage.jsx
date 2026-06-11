@@ -4,7 +4,7 @@ import ColorDetail from '../components/ColorDetail.jsx'
 import RemeasureModal from '../components/RemeasureModal.jsx'
 import CutPieceModal from '../components/CutPieceModal.jsx'
 
-export default function StockPage({ onTransfer }) {
+export default function StockPage({ onTransfer, onReceive }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -64,6 +64,12 @@ export default function StockPage({ onTransfer }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {onReceive && (
+        <button className="btn-primary" onClick={onReceive}
+          style={{ width: '100%', padding: '0.75rem', fontWeight: 600 }}>
+          + Приход ткани
+        </button>
+      )}
       <input
         placeholder="Поиск по названию или коду…"
         value={search}

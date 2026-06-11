@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-export default function ReceivePage({ onDone }) {
+export default function ReceivePage({ onDone, onCancel }) {
   const [colors, setColors] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [locations, setLocations] = useState([])
@@ -115,7 +115,9 @@ export default function ReceivePage({ onDone }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <h2 style={{ fontWeight: 700, fontSize: '1.125rem' }}>Новый приход ткани</h2>
+      {onCancel && (
+        <button className="btn-ghost" style={{ padding: '0.25rem 0', alignSelf: 'flex-start' }} onClick={onCancel}>← Назад</button>
+      )}
 
       <div>
         <label>Цвет</label>
